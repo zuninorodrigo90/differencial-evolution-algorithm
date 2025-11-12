@@ -30,6 +30,7 @@ DE evolves a population of candidate vectors through three main steps in each ge
 ---
 
 ## Pseudocode — DE/rand/1/bin
+```
 
 Input:
 f(x)       // objective function to minimize
@@ -78,6 +79,7 @@ x_best, f_best
                    f_best = fu
 
 3) Return (x_best, f_best)
+```
 
 ---
 
