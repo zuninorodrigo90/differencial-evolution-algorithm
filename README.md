@@ -1,4 +1,4 @@
-# Differential Evolution (DE) — Simple Java Implementation
+# Differential Evolution (DE)
 
 This repository contains a minimal implementation of the **Differential Evolution (DE)** algorithm using the classic **DE/rand/1/bin** strategy in plain Java (tested with Java 25).
 
@@ -15,6 +15,20 @@ DE evolves a population of candidate vectors through three main steps in each ge
 3. **Selection** — keep the better individual between the parent and trial (for minimization).
 
 ---
+## Configuration used
+
+| Config name         | F   | CR  | Characteristics    |
+| ------------------- | --- | --- | ------------------ |
+| baseline            | 0.8 | 0.9 | common standard    |
+| exploration         | 0.9 | 0.5 | stronger mutation  |
+| exploitation        | 0.5 | 0.9 | stronger crossover |
+| balanced            | 0.6 | 0.6 | trade-off          |
+| aggressive mutation | 1.0 | 0.3 | extreme mutation   |
+
+
+Each configuration is applied to each function over N runs.
+
+---
 
 ## Algorithm Parameters
 
@@ -26,6 +40,49 @@ DE evolves a population of candidate vectors through three main steps in each ge
 | `CR` | Crossover rate | 0.5 – 0.9  (typically 0.9) |
 | `Gmax` | Number of generations | user-defined |
 | `L, U` | Lower / upper bounds | values are clipped to this range |
+
+---
+
+## Configuration used
+For each f1..f10:
+```
+====================================================
+FUNCTION f7
+====================================================
+exploitation | F=0.50 CR=0.90 | RUN VALUES:
+run  1: 0.001731923445812
+run  2: 0.003510879334112
+...
+AVERAGE = 0.002947191443272
+```
+This produces:
+
+- 10 objective function evaluations ×
+
+- 5 configurations ×
+
+- 10 repeated runs each
+
+- Total: 500 optimization runs per execution.
+
+
+---
+
+## Core DE Strategy (DE/rand/1/bin)
+For each candidate:
+
+```
+mutant = pop[r1] + F * (pop[r2] - pop[r3])
+trial[i] = (rand < CR) ? mutant[i] : parent[i]
+if trial is better → accept
+
+```
+Boundary handling: clipping
+````
+if v[j] > UPPER → v[j] = UPPER
+if v[j] < LOWER → v[j] = LOWER
+
+````
 
 ---
 
@@ -129,39 +186,20 @@ Best position: [0.997, 0.996, 0.997, 0.996, 0.997]
 
 Available benchmark functions (to **minimize**):
 
-| Option | Name | Definition | Description |
-|:------:|------|-------------|--------------|
-| **1** | Sphere | f(x) = Σ x_i² | Simple convex quadratic bowl. |
-| **2** | SumSquares | f(x) = Σ (Σ_{j=1}^i x_j)² | Uses cumulative sums; harder than Sphere. |
-| **3** | Rosenbrock | f(x) = Σ [100(x_{i+1}-x_i²)² + (1-x_i)²] | Classic non-convex "banana" valley. |
-| **4** | Schwefel-like | f(x) = -Σ x_i sin(√|x_i|) | Multimodal function with many local minima. |
+| ID | Function        | Landscape                  |
+| -: | --------------- | -------------------------- |
+|  1 | Sphere          | Smooth, convex             |
+|  2 | Schwefel 2.22   | Absolute + product         |
+|  3 | Schwefel 1.2    | Cumulative sums            |
+|  4 | Schwefel 2.21   | Uses max(abs(xi))          |
+|  5 | Rosenbrock      | Narrow curved valley       |
+|  6 | Step            | Discontinuous, plateaus    |
+|  7 | Quartic + noise | Increasing polynomial      |
+|  8 | Schwefel        | Highly multimodal          |
+|  9 | Rastrigin       | Highly multimodal periodic |
+| 10 | Ackley          | Common GA/DE benchmark     |
 
-You can modify or extend the objectives inside `MainDE.java` by implementing the `ObjectiveFunction` interface.
+All functions return a real number to be minimized.
 
 ---
 
-## Notes
-
-- **Strategy used:** `DE/rand/1/bin`
-- **Boundary handling:** simple clipping to `[LOWER, UPPER]`
-- **Stopping criterion:** fixed number of generations (`GMAX`)
-- **Optimization goal:** minimization
-- **Reproducibility:** fixed random seed (`42`)
-- **Java version:** 25 or newer
-
-Default parameters (set in `MainDE.java`):
-
-F = 0.8
-CR = 0.9
-GMAX = 2000
-LOWER = -30.0
-UPPER = 30.0
-
-You can safely adjust these to test different configurations.
-
-
-## Author
-
-**Rodrigo Zunino**  
-*Design of bio-inspired algorithm (DABI)* —
-*Master’s Student — Formal Methods in Software Engineering*  
